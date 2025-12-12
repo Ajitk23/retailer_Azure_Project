@@ -1,0 +1,253 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "targetreatilerADF"
+		},
+		"AzureSqldb_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'AzureSqldb'"
+		},
+		"AzureSqldb_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "target1server.database.windows.net"
+		},
+		"AzureSqldb_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "target_db"
+		},
+		"AzureSqldb_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "target"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/data Ingestion')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqldb_ctrltbl",
+								"type": "DatasetReference",
+								"parameters": {
+									"table_name": "cntrl_tbl"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "getTable",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "tab_name",
+										"value": {
+											"value": "@item().table_name",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "getQuery",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "getInjectionDate",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "query",
+										"value": {
+											"value": "@concat('select * from', variables('tab_name'), 'where',variables('inc_col'), '=', variables('injection_date'))",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "getInjectionDate",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "getIncrementalcol",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "injection_date",
+										"value": {
+											"value": "@item().ingestion_dt",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "getIncrementalcol",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "getTable",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "inc_col",
+										"value": {
+											"value": "@item().incremental_col",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"tab_name": {
+						"type": "String"
+					},
+					"inc_col": {
+						"type": "String"
+					},
+					"injection_date": {
+						"type": "String"
+					},
+					"query": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-12-12T09:08:06Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureSqldb_ctrltbl')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqldb_ctrltbl')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqldb",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"table_name": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": {
+						"value": "@dataset().table_name",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqldb')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqldb')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('AzureSqldb_properties_typeProperties_server')]",
+					"database": "[parameters('AzureSqldb_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('AzureSqldb_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('AzureSqldb_password')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
