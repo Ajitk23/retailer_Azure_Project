@@ -7,9 +7,17 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "targetreatilerADF"
 		},
+		"AzureDataLakeStorage_ls_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage_ls'"
+		},
 		"AzureSqldb_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'AzureSqldb'"
+		},
+		"AzureDataLakeStorage_ls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://targetstorageproject.dfs.core.windows.net/"
 		},
 		"AzureSqldb_properties_typeProperties_server": {
 			"type": "string",
@@ -50,8 +58,14 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"AzureDataLakeStorage_ls_accountKey": {
+						"value": "[parameters('AzureDataLakeStorage_ls_accountKey')]"
+					},
 					"AzureSqldb_password": {
 						"value": "[parameters('AzureSqldb_password')]"
+					},
+					"AzureDataLakeStorage_ls_properties_typeProperties_url": {
+						"value": "[parameters('AzureDataLakeStorage_ls_properties_typeProperties_url')]"
 					},
 					"AzureSqldb_properties_typeProperties_server": {
 						"value": "[parameters('AzureSqldb_properties_typeProperties_server')]"

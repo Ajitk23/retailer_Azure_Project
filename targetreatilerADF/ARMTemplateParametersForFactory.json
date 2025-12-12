@@ -5,8 +5,14 @@
 		"factoryName": {
 			"value": "targetreatilerADF"
 		},
+		"AzureDataLakeStorage_ls_accountKey": {
+			"value": ""
+		},
 		"AzureSqldb_password": {
 			"value": ""
+		},
+		"AzureDataLakeStorage_ls_properties_typeProperties_url": {
+			"value": "https://targetstorageproject.dfs.core.windows.net/"
 		},
 		"AzureSqldb_properties_typeProperties_server": {
 			"value": "target1server.database.windows.net"
