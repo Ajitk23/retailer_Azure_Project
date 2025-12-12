@@ -1,0 +1,9 @@
+{
+	"name": "targetreatilerADF",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "d7f80472-c67e-45d7-8c6f-8541d300e67c",
+		"tenantId": "95d9d52e-b7cc-43ba-96d5-06e7e34bf24b"
+	}
+}

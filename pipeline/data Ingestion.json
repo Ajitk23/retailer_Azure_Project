@@ -1,0 +1,38 @@
+{
+	"name": "data Ingestion",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSqldb_ctrltbl",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": "cntrl_tbl"
+						}
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2025-12-12T09:08:06Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
