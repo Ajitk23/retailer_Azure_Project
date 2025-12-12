@@ -29,8 +29,133 @@
 					},
 					"firstRowOnly": false
 				}
+			},
+			{
+				"name": "ForEach",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "getTable",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tab_name",
+								"value": {
+									"value": "@item().table_name",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "getQuery",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "getInjectionDate",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "query",
+								"value": {
+									"value": "@concat('select * from', variables('tab_name'), 'where',variables('inc_col'), '=', variables('injection_date'))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "getInjectionDate",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "getIncrementalcol",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "injection_date",
+								"value": {
+									"value": "@item().ingestion_dt",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "getIncrementalcol",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "getTable",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "inc_col",
+								"value": {
+									"value": "@item().incremental_col",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
 			}
 		],
+		"variables": {
+			"tab_name": {
+				"type": "String"
+			},
+			"inc_col": {
+				"type": "String"
+			},
+			"injection_date": {
+				"type": "String"
+			},
+			"query": {
+				"type": "String"
+			}
+		},
 		"annotations": [],
 		"lastPublishTime": "2025-12-12T09:08:06Z"
 	},
