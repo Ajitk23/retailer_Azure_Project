@@ -183,7 +183,7 @@
 									"type": "Copy",
 									"dependsOn": [
 										{
-											"activity": "getQuery",
+											"activity": "gettargetfileName",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -241,6 +241,30 @@
 											}
 										}
 									]
+								},
+								{
+									"name": "gettargetfileName",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "getQuery",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "targetfileName",
+										"value": {
+											"value": "@concat(variables('tab_name'), '_', formatDateTime(variables('injection_date'), 'ddMMyyyy'), '.json')",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
@@ -260,6 +284,9 @@
 						"type": "String"
 					},
 					"query": {
+						"type": "String"
+					},
+					"targetfileName": {
 						"type": "String"
 					}
 				},
