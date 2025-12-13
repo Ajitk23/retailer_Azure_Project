@@ -235,7 +235,7 @@
 													"type": "Expression"
 												},
 												"file_name": {
-													"value": "@concat(variables('tab_name'),'.json')",
+													"value": "@variables('targetfileName')",
 													"type": "Expression"
 												}
 											}
@@ -261,24 +261,7 @@
 									"typeProperties": {
 										"variableName": "targetfileName",
 										"value": {
-											"value": "@concat(variables('tab_name'), '_', formatDateTime(variables('injection_date'), 'ddMMyyyy'), '.json')",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "gettargetfileName_copy1",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "targetfileName",
-										"value": {
-											"value": "@concat(variables('tab_name'), '_', formatDateTime(variables('injection_date'), 'ddMMyyyy'), '.json')",
+											"value": "@concat(\n  variables('tab_name'),\n  '_',\n  formatDateTime(variables('injection_date'), 'ddMMyyyy'),\n  '.json'\n)\n",
 											"type": "Expression"
 										}
 									}
